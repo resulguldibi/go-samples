@@ -1,0 +1,408 @@
+<html>
+<head></head>
+<style>
+
+.actualColor{
+	float: left; clear: both; width: 100px; height: 100px; border: 1px double black; margin: 0px 10px 0px 0px;border-radius: 50%;
+}
+
+.mixColor{
+	float: left; width: 100px; height: 100px; border: 1px double black;border-radius: 50%;
+}
+
+.level1RandomContainer{
+	width: 650px;height: 100px;margin: auto;margin-top:30px;
+}
+
+.level2RandomContainer{
+	width: 1220px;height: 100px;margin: auto;margin-top:30px;
+}
+
+.level3RandomContainer{
+	width: 1220px;height: 100px;margin: auto;margin-top:30px;
+}
+
+
+.level4RandomContainer{
+	width: 1220px;height: 100px;margin: auto;margin-top:30px;
+}
+
+
+.level1RandomColor{
+float: left; width: 120px; height: 120px; margin: 0px 10px 0px 0px; border: 1px double black;border-radius: 50%;
+}
+
+.level2RandomColor{
+float: left; width: 100px; height: 100px; margin: 0px 10px 0px 0px; border: 1px double black;border-radius: 50%
+}
+
+.level3RandomColor{
+float: left; width: 66px; height: 66px; margin: 0px 10px 0px 0px; border: 1px double black;border-radius: 50%
+}
+
+.level4RandomColor{
+float: left; width: 50px; height: 50px; margin: 0px 10px 0px 0px; border: 1px double black;border-radius: 50%
+}
+
+.level1Container{
+
+float: left; width: 120px; height: 120px; margin: 0px 10px 0px 0px; cursor: pointer;
+
+}
+
+.level2Container{
+
+float: left; width: 102px; height: 102px; margin: 0px 10px 0px 0px; cursor: pointer;
+
+}
+
+.level3Container{
+
+float: left; width: 68px; height: 68px; margin: 0px 10px 0px 0px; cursor: pointer;
+
+}
+
+.level4Container{
+
+float: left; width: 51px; height: 51px; margin: 0px 10px 0px 0px; cursor: pointer;
+
+}
+
+
+</style>
+<body>
+	
+	<div id="mainColor" style="width: 112px;height: 100px;margin: auto;padding-bottom: 20px;padding-top:50px;"></div>
+	<div style="clear:both;"></div>
+	
+	<div style="width: 224px; height: 100px; margin: auto; padding-bottom: 10px; padding-top: 10px;">
+		<div align="center" id="result" style="margin: auto;font-weight: bold;font-size:20px;"></div><div style="clear:both;"></div>
+		<div align="center" id="stepNumber" style="margin: auto;font-weight: bold;font-size:20px;"></div>
+	</div>
+	
+	<div id="randomColors" class="level2RandomContainer"></div>
+	
+	<div style="width: 330px;height: 100px;margin: auto;padding-bottom: 20px;padding-top:50px;"> 
+		<div style="float:left;margin-right:10px;">
+		<button style="width:100px;height:50px;cursor:pointer;" onclick="refreshItems()">refresh</button>
+		</div>
+		<div style="float:left;margin-right:10px;">
+			<select onchange="onLevelChange(this)" style="width:100px;height:50px;padding:5px;">
+				<option value="-1">level</option>
+				<option value="1">1</option>
+				<option value="2" selected>2</option>
+				<option value="3">3</option>
+				<option value="4">4</option>
+			</select>
+		</div>
+		<div style="float:left;">
+		<button style="width:40px;height:50px;cursor:pointer;" onclick="help()">?</button>
+		</div>
+	</div>
+
+</body>
+
+<script type="text/javascript">
+	
+	
+	//amac bir rengin hangi n rengin karýsýmýndan elde edildiðini bulmak, bunun için toplam 5 * n + 1 adet random renk olusturulur.	
+	//bu renkler generate edilirken, ilk olarak n adet random renk elde edilir. sonrasýnda bu n rengin karýsýmlarýndan bir renk elde edilir.
+	//geriye kalan (5 * n + 1 - (n +1)) adet random renk elde edilir. 
+	//bu renklerden 1 tanesi karýsým sonucu bulunmasý gereken renk 5 * n tanesi ise, bu rengi elde etmek için kullanýlabilecek renk seti olmalýdýr.
+	
+	var n = 2;
+	var totalColorCount = 5 * n + 1
+		
+	document.getElementById('result').innerHTML = '';
+	document.getElementById('stepNumber').innerHTML = '';
+	window.stepNumber = 0;
+	initColors();
+	
+	function help(){
+		var list = document.getElementsByClassName('choise');
+		
+		for(var i=0;i<list.length;i++){
+			var item = list[i]
+			
+			var istried = item.getAttribute("istried");
+			var isselected = item.getAttribute("isselected");
+			
+			if (istried ==='true'){
+				item.click();
+			}else if (isselected ==='true'){
+				item.click();
+			}
+		}
+	}
+	function onLevelChange(item){
+		if (item.value == -1) {
+			return false;
+		}
+		n = item.value;
+		totalColorCount = 5 * n + 1;
+		document.getElementById('result').innerHTML = '';
+		document.getElementById('stepNumber').innerHTML = '';
+		window.stepNumber = 0;
+		
+		document.getElementById('randomColors').setAttribute("class","level"+n+"RandomContainer");
+		
+		refreshItems();
+	}
+	function choiseChange(item){
+		
+		document.getElementById('result').innerHTML = '';
+		document.getElementById('stepNumber').innerHTML = '';
+		console.log(item)
+					
+		var list = document.getElementsByClassName('choise');
+		var colors = [];
+		for(var i=0;i<list.length;i++){
+			if(list[i].checked){
+				var item = list[i]
+				var color = {}
+				color.r = parseInt(item.getAttribute("r"))
+				color.g = parseInt(item.getAttribute("g"))
+				color.b = parseInt(item.getAttribute("b"))
+				colors.push(color)				
+			}
+		}
+			
+			
+		var mixColor = generateMixColor(colors);
+		
+		
+		var list = document.getElementsByClassName('mixColor');
+		
+		for(var i=0;i<list.length;i++){
+			document.getElementById("mainColor").removeChild(list[i])
+		}
+		
+		var list = document.getElementsByClassName('actualColor');
+		
+		for(var i=0;i<list.length;i++){
+			list[i].style.margin="0px 10px 0px 0px"
+		}
+		
+		document.getElementById("mainColor").style.width = "224px";
+		document.getElementById("mainColor").style.clear = "";
+		
+		var divMixColor = document.createElement("div");		
+		divMixColor.style.background = getColorHexCode(mixColor)
+		
+		divMixColor.setAttribute("class", "mixColor");	
+		divMixColor.setAttribute("r", mixColor.r);	
+		divMixColor.setAttribute("g", mixColor.g);	
+		divMixColor.setAttribute("b", mixColor.b);	
+		
+		divMixColor.style.clear = "";
+		
+		
+		document.getElementById("mainColor").appendChild(divMixColor)
+		
+		var actualColorList = document.getElementsByClassName('actualColor');
+		var actualColorItem  = actualColorList[0]
+		
+		actualColor = {}
+		actualColor.r = parseInt(actualColorItem.getAttribute("r"))
+		actualColor.g = parseInt(actualColorItem.getAttribute("g"))
+		actualColor.b = parseInt(actualColorItem.getAttribute("b"))
+		
+		window.stepNumber += 1;
+		document.getElementById('stepNumber').innerHTML = window.stepNumber + '. adým';
+		
+		
+		if (mixColor != null && mixColor != undefined && actualColor != null && actualColor != undefined){
+			
+			if (actualColor.r === mixColor.r && actualColor.g === mixColor.g && actualColor.b === mixColor.b ){
+				document.getElementById('result').innerHTML = 'Tebrikler, kazandýnýz !!!!!!'
+			}			
+		}
+		
+		
+	}
+	
+	function isColorExist(colors,color){
+		
+		var isExist = false;
+		if(colors != null && colors != undefined && colors.length > 0){
+			for(var i=0;i<colors.length;i++){
+				var item = colors[i];
+				
+				if (item != null && item != undefined && color != null && color != undefined){
+			
+					if (color.r === item.r && color.g === item.g && color.b === item.b ){
+						isExist = true;
+						break;
+					}			
+				}							
+			}
+		}
+		
+		return isExist	
+	}
+	
+	function initColors(){
+		document.getElementById('result').innerHTML = '';
+		document.getElementById('stepNumber').innerHTML = '';
+			
+		var randomColors = [];
+		
+		//ilk olarak n adet random renk olustur.
+		for(var i=0;i<n;i++){		
+			var color = generateRandomColor()			
+			if(!isColorExist(randomColors,color)){
+				color.isselected = true;
+				randomColors.push(color)		
+			}
+		}
+				
+		var mixColor = generateMixColor(randomColors)
+		
+		var mixColorList = [];
+		mixColorList.push(mixColor)
+						
+		for(var i=0;i<4 * n;i++){
+			var color = generateRandomColor()			
+			if(!isColorExist(randomColors,color) && !isColorExist(mixColorList,color)){
+				color.isselected = false;
+				randomColors.push(color)
+			}
+						
+		}
+		
+		var finalColors = [];					
+		
+		var divMainColor = document.createElement("div");		
+		divMainColor.style.background = getColorHexCode(mixColor)
+		
+		divMainColor.setAttribute("class", "actualColor");	
+		
+		divMainColor.setAttribute("r", mixColor.r);	
+		divMainColor.setAttribute("g", mixColor.g);	
+		divMainColor.setAttribute("b", mixColor.b);	
+		
+		
+		document.getElementById("mainColor").appendChild(divMainColor)
+	
+		for(var i=0;i<randomColors.length;i++){
+			finalColors.push(randomColors[i]);
+		}
+		
+		for(var i=0;i<n;i++){
+			var random = i;
+			while(random === i){
+				random = generateRandomNumer(5* n);
+			}
+			
+			tmp = finalColors[i];
+			finalColors[i] = finalColors[random]
+			finalColors[random] = tmp
+		}
+		
+	
+		for (var i=0;i<finalColors.length;i++){
+			var div = document.createElement("div");		
+			var divContainer = document.createElement("div");
+						
+			divContainer.setAttribute("onclick", "this.childNodes[1].click();if(this.childNodes[1].checked){this.style.margin='20px 10px 0px 0px';this.childNodes[1].setAttribute('istried','true');}else{this.style.margin='0px 10px 0px 0px';this.childNodes[1].setAttribute('istried','false');}");	
+			divContainer.setAttribute("class","level"+n+"Container");
+									
+			div.setAttribute("class","level"+n+"RandomColor");
+			div.style.background = getColorHexCode(finalColors[i])
+			divContainer.appendChild(div)
+						
+			var choise = document.createElement("INPUT");
+			
+			choise.style.cursor = "pointer";
+			
+			choise.setAttribute("type", "checkbox");	
+			
+			choise.setAttribute("r",finalColors[i].r);	
+			choise.setAttribute("g",finalColors[i].g);	
+			choise.setAttribute("b",finalColors[i].b);	
+			
+			choise.setAttribute("isselected",finalColors[i].isselected);	
+			
+			choise.setAttribute("class","choise");	
+			
+			choise.setAttribute("onchange", "choiseChange(this)");	
+			choise.style.display = "none";	
+			choise.style.width = "100px";			
+			choise.style.margin = "5px 0px 0px 0px";			
+			divContainer.appendChild(choise)
+			
+			var divSeperator = document.createElement("div");	
+			divSeperator.style.clear="both";
+			divContainer.appendChild(divSeperator)
+			
+			document.getElementById("randomColors").appendChild(divContainer)
+		}
+	}
+	
+	function refreshItems(){
+		
+		window.stepNumber = 0
+		clearChilds("mainColor")
+		clearChilds("randomColors")
+		
+		var mainColor = document.getElementById('mainColor');
+		mainColor.style.width="112px"
+		
+		
+		initColors()
+	}
+	
+	function clearChilds(element){
+		
+		var myNode = document.getElementById(element);
+		while (myNode.firstChild) {
+			myNode.removeChild(myNode.firstChild);
+		}
+	}
+	
+	
+	
+	function getColorHexCode(color){
+		return "#"+ getColor(color.r)+getColor(color.g)+getColor(color.b);
+	}
+	
+	function generateMixColor(colors){
+		var r=0,g=0,b=0;
+		for(var i=0;i<colors.length;i++){
+			r = r + colors[i].r
+			g = g + colors[i].g
+			b = b + colors[i].b
+		}
+		
+		var color = {}
+		color.r = Math.floor( r / colors.length)
+		color.g = Math.floor( g / colors.length)
+		color.b = Math.floor( b / colors.length)
+		
+		return color
+	}
+	
+	function generateRandomColor(){		
+		var color = {}
+		color.r = generateRandomNumer(256)
+		color.g = generateRandomNumer(256)
+		color.b = generateRandomNumer(256)
+		return color
+	}
+	
+	function getColor(code){		
+		if (code < 10)
+			return code.toString(16) + code.toString(16)
+		else
+			return code.toString(16)
+	}
+	
+	function generateRandomNumer(maxNumber){
+		return Math.floor(Math.random() * maxNumber); 
+	}
+
+
+
+</script>
+
+</html>
